@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    networks:
+      - app-network
+    depends_on:
+      - db
+      - cache
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=mongodb://db:27017/mydatabase
+      - CACHE_URL=redis://cache:6379
+
+  db:
+    image: mongo:4.4
+    volumes:
+      - db-data:/data/db
+    networks:
+      - app-network
+
+  cache:
+    image: redis:alpine
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  db-data:
