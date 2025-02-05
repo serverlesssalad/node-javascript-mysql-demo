@@ -123,3 +123,13 @@ docker run --name mysql-container \
   -e MYSQL_PASSWORD=mypassword \
   -p 3306:3306 -d mysql:latest
 ```
+
+### Create Docker image for project
+```
+docker build -t node-javascript-mysql-demo .
+```
+
+### Run Docker image
+```
+docker run -p 3000:3000 node-javascript-mysql-demo -e DB_HOST=localhost -e DB_USER=root -e MYSQL_ROOT_PASSWORD=password
+```
