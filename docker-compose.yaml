@@ -1,0 +1,43 @@
+version: '3.8'  # Specify the Compose file version
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      DB_HOST: db        # Service name of the database
+      DB_USER: root
+      DB_PASSWORD: password
+      DB_NAME: word_database
+      PORT: 3000
+    depends_on:
+      - db              # Ensure the db service is started before this one
+      - cache            # Ensure the cache service is created before this one
+    networks:
+      - app-network
+
+  db:
+    image: mysql:5.7  # Use MySQL version 5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: word_database
+    volumes:
+      - db-data:/var/lib/mysql  # Persist MySQL data
+    networks:
+      - app-network
+
+  cache:
+    image: redis:alpine  # A lightweight Redis image
+    ports:
+      - "6379:6379"      # Optionally expose Redis on port 6379 (default)
+    networks:
+      - app-network
+      
+networks:
+  app-network:  # Define a network for services to communicate with each other
+
+volumes:
+  db-data:      # Define a named volume for database persistence
