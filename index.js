@@ -10,13 +10,53 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 
 // Health Check
+// Health Check with Environment Variable Check and DB Connectivity Check
 app.get("/health", (req, res) => {
-  res.json({ status: "healthy" });
+  const missingEnvVars = [];
+
+  // Check for missing environment variables
+  const requiredEnvVars = [
+    { name: "DB_HOST", example: "localhost" },
+    { name: "DB_USER", example: "root" },
+    { name: "DB_PASSWORD", example: "yourpassword" },
+    { name: "DB_NAME", example: "yourdatabase" }
+  ];
+
+  requiredEnvVars.forEach((envVar) => {
+    if (!process.env[envVar.name]) {
+      missingEnvVars.push({ name: envVar.name, example: envVar.example });
+    }
+  });
+
+  // If any environment variables are missing, return an error
+  if (missingEnvVars.length > 0) {
+    return res.status(500).json({
+      status: "error",
+      message: "Missing environment variables",
+      missing: missingEnvVars
+    });
+  }
+
+  // Check MySQL connection using the already created connection from db.js
+  const connection = require("./db");
+
+  connection.ping((err) => {
+    if (err) {
+      return res.status(500).json({
+        status: "error",
+        message: "Database connection failed",
+        error: err.message
+      });
+    }
+
+    // If the DB connection is successful, send a healthy status
+    res.json({ status: "healthy" });
+  });
 });
 
 // Word Routes
 app.use("/api/words", wordsRouter);
 
 app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-  });
+  console.log(`Server running on http://localhost:${PORT}`);
+});
