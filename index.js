@@ -28,8 +28,9 @@ app.get("/health", (req, res) => {
     }
   });
 
-  // If any environment variables are missing, return an error
+  // If any environment variables are missing, log and return an error
   if (missingEnvVars.length > 0) {
+    console.error("Missing environment variables:", missingEnvVars);
     return res.status(500).json({
       status: "error",
       message: "Missing environment variables",
@@ -42,6 +43,7 @@ app.get("/health", (req, res) => {
 
   connection.ping((err) => {
     if (err) {
+      console.error("Database connection failed:", err);
       return res.status(500).json({
         status: "error",
         message: "Database connection failed",
